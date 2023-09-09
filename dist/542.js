@@ -1,0 +1,1 @@
+(()=>{let e;function t(t){clearInterval(e),e=setInterval((()=>{const e=new Date;self.postMessage(e)}),t)}self.addEventListener("message",(a=>{if("start"===a.data.type)t(a.data.interval);else if("changeInterval"===a.data.type)t(a.data.interval);else if("getCurrentTime"===a.data.type){const e=new Date;self.postMessage(e)}else"stop"===a.data.type&&clearInterval(e)}))})();
