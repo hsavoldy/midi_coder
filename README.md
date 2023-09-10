@@ -4,7 +4,7 @@ midi_coder is a library for creating highly-modifiable javascript sequencers.
 
 ## Installation
 
-Simply include dist/midi_coder.js in your project.
+Simply include midi_coder.js in your project.
 
 ## Setup
 
@@ -22,6 +22,15 @@ value = midiCoder.initialCode(value);
 
 //To use live coding functionality. 'string' is the codebox contents
 midiCoder.enableLiveCoding(string);
+
+//To use clock, either setup a Tone.js loop...
+const loop = new Tone.Loop((time) => {
+ 	midiCoder.onClock();
+ }, "8n").start(0);
+
+//...or use midi clock
+midiCoder.setMidiClock(true);
+
 
 ```
 
