@@ -1,0 +1,26 @@
+{
+  "name": "midi_coder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/midi_coder.js",
+  "dependencies": {
+    "webpack": "^5.88.2"
+  },
+  "devDependencies": {
+    "webpack-cli": "^5.1.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hsavoldy/midi_coder.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hsavoldy/midi_coder/issues"
+  },
+  "homepage": "https://github.com/hsavoldy/midi_coder#readme"
+}
