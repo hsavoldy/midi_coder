@@ -24,11 +24,12 @@ value = midiCoder.initialCode(value);
 midiCoder.enableLiveCoding(string);
 
 //To use clock, either setup a Tone.js loop...
+//NOTE that midiCoder Seqs expect to receive onClock() every 24ppq, so multiply the desired quarter note time by 1/24
 const loop = new Tone.Loop((time) => {
  	midiCoder.onClock();
  }, "8n").start(0);
 
-//...or use midi clock
+//...or use midi clock (already at 24ppqn)
 midiCoder.setMidiClock(true);
 
 
@@ -56,4 +57,15 @@ var a = new midiCoder.Seq([1,2],[1/4,1/2]);
 //Add the sequencer to the dictionary to get called
 midiCoder.seqs_dict['a']=a;
 
+```
+
+### Change Seq Function
+
+To change what a sequencer does on each step (sending MIDI notes by default), redefine the Seq's stepFunc. This can either be set to an existing stepFunc already defined in the Seq, such as sendNote of sendCC, or to a new one. The current value is stored in the Seq's instance variable "curVal", which is updated every step.
+
+For example:
+
+```javascript
+var a = new midiCoder.Seq([1,2]);
+a.stepFunc = function(){console.log("the current step is", a.curVal);};
 ```

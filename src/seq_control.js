@@ -81,92 +81,26 @@ export class Seq {
 		this.octave = 0;
 		this.valsName = null;
 		this.dursName = null;
+		this.curVal = null;
 	}
 
 	executeStep() {
 		this.updateArrays();
+		this.advanceStep();
 		this.stepFunc();
-		// this.displayBarBeat();
-		// this.display(column[0]);
 	}
-	// display(col) {
-	// 	// add col to column array
-	// 	column[0] = col;
-	// 	// divID = div;
-	// 	var html = 'Sequence \'' + this.name + '\':<br><br>';
-	// 	// if (this.name in seqs_dict) {
-	// 	// 	html = 'Sequence \'' + this.name + '\':<br><br>';
-	// 	// }
-	// 	// else {
-	// 	// 	// add this.name to seqs_dict
-	// 	// 	seqs_dict[this.name] = this;
-	// 	// 	// print everything in seqs_dict
-	// 	// 	html += 'Sequence \'' + this.name + '\':<br><br>';
-	// 	// }
-		
+	
+	advanceStep() {
+		this.curVal = this.nextVal();
 
-	// 	var vals = this.vals.slice();
+		//apply transform
+		this.curVal = this.transform(this.curVal);
 
-	// 	if (vals[this.noteInd-1] < -1000) {
-	// 		vals[this.noteInd-1] = '_';
-	// 	}
-	// 	if (vals[this.vals.length-1] < -1000) {
-	// 		vals[this.vals.length-1] = '_';
-	// 	}
-	// 	vals[this.noteInd-1] = '<b>' + vals[this.noteInd-1] + '</b>';
-	// 	if (this.noteInd-1 < 0) {
-	// 		vals[this.vals.length-1] = '<b>' + vals[this.vals.length-1] + '</b>';
-	// 	}
-	// 	var count = 0;
-	// 	var flag = false;
-	// 	for (var i = 0; i < vals.length; i++) {
-	// 		if (vals[i] < -1000) {
-	// 			vals[i] = '_';
-	// 		}
-	// 		html += vals[i] + ' ';
-	// 		count++;
-	// 		if (count == col ) {
-	// 			html += '<br>';
-	// 			count = 0;
-	// 		}
-	// 	}
-	// 	html += '<br><br>';
+		if (this.curVal == null) {	return;	}
+		if (muted) {	return;	}
 
-	// 	html += 'durations: ';
-	// 	var durss = '';
-	// 	for (var i = 0; i < this.durs.length; i++) {
-	// 			var dur = Math.round(this.durs[i] * 10000) / 10000;
-	// 			if (i == this.durs.length - 1) {
-	// 				durss += dur;
-	// 				break;
-	// 			}
-	// 			durss += dur + ', ';
-	// 	}
-
-	// 	if (durss == '') {
-	// 		durss = '0.25';
-	// 	}
-
-	// 	html += durss;
-
-	// 	html += '<br>';
-	// 	html += 'index: ';
-	// 	html += this.noteInd;
-
-	// 	html += '<br>';
-
-	// 	document.getElementById(divID).innerHTML = html;
-	// }
-
-	// displayBarBeat() {
-
-	// 	var bar = Math.floor(globalClock/(beatsPerMeasure*24));
-	// 	var beat = Math.floor(globalClock/24)-bar*beatsPerMeasure+1;
-	// 	bar += 1;
-
-	// 	document.getElementById('bar').innerHTML = bar;
-	// 	document.getElementById('beat').innerHTML = beat;
-	// }
+		this.channel = checkChannel(this.channel);
+	}
 
 	sendNoteOff(noteNum) {
 		if (noteNum == null | noteNum < 0) {
@@ -184,17 +118,7 @@ export class Seq {
 	}
 
 	sendNote() {
-		var noteNum = this.nextVal();
-		var velocity = this.velocity;
-
-		//apply transform
-		noteNum = this.transform(noteNum);
-
-		if (noteNum == null) {	return;	}
-		if (muted) {	return;	}
-
-		var channel = checkChannel(this.channel);
-
+		var noteNum = this.curVal;
 		//send note off if value is not ≈ (tie), e.g. -87654321
 		if(noteNum > -900000000 && noteNum < -7000000) return;
 		this.sendNoteOff(this.lastNoteSent, this.channel);
@@ -227,7 +151,7 @@ export class Seq {
 		if (midiNote < 0 || midiNote == null || midiNote > 127) {	return;	}
 
 		//send MIDI msg
-		const noteOnMessage = [0x90 + channel - 1, midiNote, velocity];    // 0x90 note on + channel, midi pitch num, velocity
+		const noteOnMessage = [0x90 + this.channel - 1, midiNote, this.velocity];    // 0x90 note on + channel, midi pitch num, velocity
 		var output = midi.outputs.get(outputMidiID);
 		output.send(noteOnMessage);
 		// updateStatusBar(['midi_output','note',midiNote,velocity]);
@@ -242,14 +166,7 @@ export class Seq {
 	}
 
 	sendCC() {
-		var val = this.transform(this.nextVal());
-		var paramNum = this.controllerNum;
-		var channel = Window.checkChannel(this.channel);
-		const ccMessage = [0xB0 + channel - 1, paramNum, val];    // 0xB0 CC + channel, controller number, data
-
-		if (muted) {
-			return;
-		}
+		const ccMessage = [0xB0 + this.channel - 1, this.controllerNum, this.curVal];    // 0xB0 CC + channel, controller number, data
 
 		var output = midi.outputs.get(outputMidiID);
 		output.send(ccMessage);
